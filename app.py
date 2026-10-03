@@ -804,20 +804,18 @@ if (
     )
 
 
-    if mode == "LIVE GEMINI":
-    
-        with st.spinner(
-            "Gemini Coordinator analyzing incident..."
-        ):
-    
-            gemini_recommendation = (
-                get_gemini_coordination(
-                    selected_village,
-                    verification,
-                    selected_resources
-                )
-            )
+      if mode == "LIVE GEMINI":
 
+                with st.spinner(
+                    "Gemini Coordinator analyzing incident..."
+                ):
+        
+                    gemini_recommendation = get_gemini_coordination(
+                        selected_village,
+                        verification,
+                        selected_resources
+                    )
+                    
      if mode == "LIVE GEMINI":
 
                         with st.spinner(
