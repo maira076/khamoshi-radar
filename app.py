@@ -844,13 +844,13 @@ if (
 
       else:
         
-            st.info(
-                "🔵 DEMO COORDINATOR\n\n"
-                "The Coordinator recommends reviewing "
-                "the highest-scoring available resources "
-                "based on distance, capacity, boat "
-                "availability and medical capability."
-            )
+         st.info(
+               "🔵 DEMO COORDINATOR\n\n"
+               "The Coordinator recommends reviewing "
+               "the highest-scoring available resources "
+               "based on distance, capacity, boat "
+               "availability and medical capability."
+          )
         
 
     c1, c2 = st.columns(2)
