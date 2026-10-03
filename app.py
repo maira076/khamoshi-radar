@@ -842,7 +842,7 @@ if (
             "availability and medical capability."
         )
 
-        else:
+      else:
         
             st.info(
                 "🔵 DEMO COORDINATOR\n\n"
