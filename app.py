@@ -818,40 +818,52 @@ if (
                 )
             )
 
-    if gemini_recommendation:
+        if mode == "LIVE GEMINI":
 
-        st.success(
-            "🟢 LIVE GEMINI COORDINATOR"
-        )
+        with st.spinner(
+            "Gemini Coordinator analyzing incident..."
+        ):
 
-        st.write(
-            gemini_recommendation
-        )
+            gemini_recommendation = get_gemini_coordination(
+                selected_village,
+                verification,
+                selected_resources
+            )
 
-    else:
+        if gemini_recommendation:
 
-        st.warning(
-            "🟡 Gemini is currently unavailable "
-            "or quota-limited. Demo fallback activated."
-        )
+            st.success(
+                "🟢 LIVE GEMINI COORDINATOR"
+            )
 
-        st.info(
-            "The Coordinator recommends reviewing "
-            "the highest-scoring available resources "
-            "based on distance, capacity, boat "
-            "availability and medical capability."
-        )
+            st.write(
+                gemini_recommendation
+            )
 
-      else:
-        
-         st.info(
-               "🔵 DEMO COORDINATOR\n\n"
-               "The Coordinator recommends reviewing "
-               "the highest-scoring available resources "
-               "based on distance, capacity, boat "
-               "availability and medical capability."
-          )
-        
+        else:
+
+            st.warning(
+                "🟡 Gemini is currently unavailable "
+                "or quota-limited. Demo fallback activated."
+            )
+
+            st.info(
+                "The Coordinator recommends reviewing "
+                "the highest-scoring available resources "
+                "based on distance, capacity, boat "
+                "availability and medical capability."
+            )
+
+        else:
+    
+            st.info(
+                "🔵 DEMO COORDINATOR\n\n"
+                "The Coordinator recommends reviewing "
+                "the highest-scoring available resources "
+                "based on distance, capacity, boat "
+                "availability and medical capability."
+            )
+            
 
     c1, c2 = st.columns(2)
 
