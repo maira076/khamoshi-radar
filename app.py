@@ -804,29 +804,16 @@ if (
     )
 
 
-     if mode == "LIVE GEMINI":
+    if mode == "LIVE GEMINI":
 
-                with st.spinner(
-                    "Gemini Coordinator analyzing incident..."
-                ):
-        
-                    gemini_recommendation = get_gemini_coordination(
-                        selected_village,
-                        verification,
-                        selected_resources
-                    )
-                    
-     if mode == "LIVE GEMINI":
-
-                        with st.spinner(
-                            "Gemini Coordinator analyzing incident..."
-                        ):
-                
-                            gemini_recommendation = get_gemini_coordination(
-                                selected_village,
-                                verification,
-                                selected_resources
-                            )
+        with st.spinner(
+            "Gemini Coordinator analyzing incident..."
+        ):
+            gemini_recommendation = get_gemini_coordination(
+                selected_village,
+                verification,
+                selected_resources
+            )
 
         if gemini_recommendation:
 
@@ -852,15 +839,15 @@ if (
                 "availability and medical capability."
             )
 
-        else:
-    
-            st.info(
-                "🔵 DEMO COORDINATOR\n\n"
-                "The Coordinator recommends reviewing "
-                "the highest-scoring available resources "
-                "based on distance, capacity, boat "
-                "availability and medical capability."
-            )
+    else:
+
+        st.info(
+            "🔵 DEMO COORDINATOR\n\n"
+            "The Coordinator recommends reviewing "
+            "the highest-scoring available resources "
+            "based on distance, capacity, boat "
+            "availability and medical capability."
+        )
             
 
     c1, c2 = st.columns(2)
