@@ -481,7 +481,7 @@ else:
             "🟢 Gemini API configured"
         )
 
-   else:
+    else:
 
         st.sidebar.error(
             "🔴 Gemini API key unavailable"
