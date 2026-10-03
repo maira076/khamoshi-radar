@@ -816,7 +816,7 @@ if (
                         selected_resources
                     )
                     
-     if mode == "LIVE GEMINI":
+      if mode == "LIVE GEMINI":
 
                         with st.spinner(
                             "Gemini Coordinator analyzing incident..."
