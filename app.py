@@ -806,37 +806,88 @@ if (
 
     if mode == "LIVE GEMINI":
 
-        with st.spinner(
-            "Gemini Coordinator analyzing incident..."
+        st.success(
+            "🟢 LIVE GEMINI MODE"
+        )
+
+        st.caption(
+            "Gemini runs only when you click the Analyze button."
+        )
+
+        result_key = (
+            f"gemini_result_{selected_village['village_id']}"
+        )
+
+        if st.button(
+            "🧠 Analyze Incident with Gemini",
+            type="primary",
+            use_container_width=True
         ):
-            gemini_recommendation = get_gemini_coordination(
-                selected_village,
-                verification,
-                selected_resources
-            )
 
-        if gemini_recommendation:
+            with st.spinner(
+                "Gemini Coordinator analyzing incident..."
+            ):
 
-            st.success(
-                "🟢 LIVE GEMINI COORDINATOR"
-            )
+                gemini_recommendation = get_gemini_coordination(
+                    selected_village,
+                    verification,
+                    selected_resources
+                )
+
+            if gemini_recommendation:
+
+                st.session_state[result_key] = (
+                    gemini_recommendation
+                )
+
+                add_audit_event(
+                    "GEMINI_COORDINATOR",
+                    (
+                        f"Gemini analyzed incident at "
+                        f"{selected_village['village_name']}."
+                    )
+                )
+
+            else:
+
+                st.session_state[result_key] = None
+
+                st.warning(
+                    "🟡 Gemini is currently unavailable "
+                    "or quota-limited."
+                )
+
+        if (
+            result_key in st.session_state
+            and st.session_state[result_key]
+        ):
 
             st.write(
-                gemini_recommendation
+                "### Gemini Coordinator Recommendation"
+            )
+
+            st.info(
+                st.session_state[result_key]
+            )
+
+            st.caption(
+                "AI-generated recommendation. "
+                "Human approval is required before dispatch."
+            )
+
+        elif result_key not in st.session_state:
+
+            st.info(
+                "Click **Analyze Incident with Gemini** "
+                "to generate a recommendation."
             )
 
         else:
 
             st.warning(
-                "🟡 Gemini is currently unavailable "
-                "or quota-limited. Demo fallback activated."
-            )
-
-            st.info(
-                "The Coordinator recommends reviewing "
-                "the highest-scoring available resources "
-                "based on distance, capacity, boat "
-                "availability and medical capability."
+                "No Gemini recommendation is currently "
+                "available. The deterministic workflow "
+                "remains active."
             )
 
     else:
@@ -848,8 +899,6 @@ if (
             "based on distance, capacity, boat "
             "availability and medical capability."
         )
-            
-
     c1, c2 = st.columns(2)
 
     c1.metric(
