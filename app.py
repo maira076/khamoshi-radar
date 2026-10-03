@@ -1,11 +1,31 @@
-
 import streamlit as st
 import pandas as pd
 from geopy.distance import geodesic
 import folium
 from streamlit_folium import st_folium
 from datetime import datetime
+import json
 
+from google import genai
+
+# =========================================================
+# GEMINI CONFIGURATION
+# =========================================================
+
+GEMINI_MODEL = "gemini-3.8-flash"
+
+
+def get_gemini_client():
+
+    try:
+        api_key = st.secrets["GEMINI_API_KEY"]
+
+        return genai.Client(
+            api_key=api_key
+        )
+
+    except Exception:
+        return None
 
 # =========================================================
 # PAGE CONFIG
@@ -309,6 +329,123 @@ def calculate_bid(village, resource):
             round(total, 2)
     }
 
+# =========================================================
+# LIVE GEMINI COORDINATOR
+# =========================================================
+
+def get_gemini_coordination(
+    village,
+    verification,
+    selected_resources
+):
+
+    client = get_gemini_client()
+
+    if client is None:
+        return None
+
+    resources_for_prompt = []
+
+    for _, resource in selected_resources.iterrows():
+
+        resources_for_prompt.append({
+            "organization":
+                resource["Organization"],
+
+            "distance_km":
+                resource["Distance (km)"],
+
+            "eta_minutes":
+                resource["ETA (min)"],
+
+            "boats":
+                resource["Boats"],
+
+            "capacity":
+                resource["Capacity"],
+
+            "medical_support":
+                bool(resource["Medical"])
+        })
+
+    prompt = f"""
+You are the Coordinator Agent of Khamoshi Radar,
+an AI-assisted flood emergency coordination system.
+
+Use ONLY the information supplied below.
+
+Do not invent:
+- casualties
+- stranded people
+- infrastructure damage
+- resources
+- dispatch activity
+
+The system has NOT dispatched anything.
+A human coordinator must make the final decision.
+
+INCIDENT
+
+Village:
+{village['village_name']}
+
+Population:
+{int(village['population'])}
+
+Flood extent:
+{float(village['flood_extent']) * 100:.0f}%
+
+Rainfall:
+{float(village['rainfall_mm'])} mm
+
+Aid requests:
+{int(village['aid_requests'])}
+
+Network:
+{village['network_status']}
+
+Silence score:
+{float(village['silence_score'])}/100
+
+Neighbor verification:
+{verification['status']}
+
+Verification confidence:
+{verification['confidence'] * 100:.0f}%
+
+PROPOSED RESOURCES
+
+{json.dumps(resources_for_prompt, indent=2)}
+
+TASK
+
+Provide a concise operational recommendation for the
+human emergency coordinator.
+
+Explain:
+
+1. Why this incident deserves attention.
+2. Why these resources are appropriate.
+3. Any important limitation or uncertainty.
+4. What the human coordinator should do next.
+
+Do not claim that dispatch has already happened.
+
+Keep the response under 180 words.
+"""
+
+    try:
+
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt
+        )
+
+        return response.text
+
+    except Exception as e:
+
+        return None
 
 # =========================================================
 # SIDEBAR
@@ -331,14 +468,24 @@ mode = st.sidebar.selectbox(
 )
 
 if mode == "DEMO MODE":
-    st.sidebar.success(
-        "Demo fallback active"
-    )
-else:
-    st.sidebar.warning(
-        "Gemini integration will be activated next."
+
+    st.sidebar.info(
+        "🔵 Demo Coordinator active"
     )
 
+else:
+
+    if get_gemini_client() is not None:
+
+        st.sidebar.success(
+            "🟢 Gemini API configured"
+        )
+
+   else:
+
+        st.sidebar.error(
+            "🔴 Gemini API key unavailable"
+        )
 
 st.sidebar.divider()
 
@@ -657,13 +804,54 @@ if (
     )
 
 
-    st.info(
-        "The Coordinator Agent has combined the "
-        "highest-scoring available resources based on "
-        "distance, capacity, boat availability and "
-        "medical capability."
-    )
+    if mode == "LIVE GEMINI":
 
+    with st.spinner(
+        "Gemini Coordinator analyzing incident..."
+    ):
+
+        gemini_recommendation = (
+            get_gemini_coordination(
+                selected_village,
+                verification,
+                selected_resources
+            )
+        )
+
+    if gemini_recommendation:
+
+        st.success(
+            "🟢 LIVE GEMINI COORDINATOR"
+        )
+
+        st.write(
+            gemini_recommendation
+        )
+
+    else:
+
+        st.warning(
+            "🟡 Gemini is currently unavailable "
+            "or quota-limited. Demo fallback activated."
+        )
+
+        st.info(
+            "The Coordinator recommends reviewing "
+            "the highest-scoring available resources "
+            "based on distance, capacity, boat "
+            "availability and medical capability."
+        )
+
+    else:
+    
+        st.info(
+            "🔵 DEMO COORDINATOR\n\n"
+            "The Coordinator recommends reviewing "
+            "the highest-scoring available resources "
+            "based on distance, capacity, boat "
+            "availability and medical capability."
+        )
+    
 
     c1, c2 = st.columns(2)
 
